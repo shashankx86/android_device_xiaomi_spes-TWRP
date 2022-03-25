@@ -8,6 +8,7 @@
 $(call inherit-product-if-exists, $(SRC_TARGET_DIR)/product/embedded.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 
 # Inherit from spes device
 $(call inherit-product, device/xiaomi/spes/device.mk)
@@ -22,3 +23,7 @@ PRODUCT_NAME := twrp_spes
 PRODUCT_BRAND := Redmi
 PRODUCT_MODEL := spes
 PRODUCT_MANUFACTURER := xiaomi
+
+# Forcefully add mtp support (adb is already there)
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    persist.sys.usb.config=mtp
