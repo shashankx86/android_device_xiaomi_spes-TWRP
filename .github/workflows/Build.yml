@@ -131,6 +131,7 @@ jobs:
       - name: Show Space Info
         run: |
           cd ${{steps.info.outputs.OutFolder}}
+          ls
           sudo zip -r9 ${{env.Rec_name}}_for_${{env.device}}_by_${{env.Author}}.zip recovery.img
           echo "::group::Out Directory Space"
           du -sh
