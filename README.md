@@ -5,7 +5,7 @@
 | Device                  | Xiaomi Redmi Note 11                                        |
 | ----------------------- | :---------------------------------------------------------- |
 | Codename                | Spes                                                        |
-| SoC                     | Qualcomm SDM660 Snapdragon 660                              |
+| SoC                     | Qualcomm SM6225 Snapdragon 680 4G (6 nm)                    |
 | CPU                     | 8x Qualcomm® Kryo™ 260 CPU up to 1.8GHz                     |
 | GPU                     | Adreno 512                                                  |
 | Memory                  | 4GB / 6GB RAM                                               |
