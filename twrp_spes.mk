@@ -15,7 +15,7 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/gsi_keys.mk)
 #$(call inherit-product, device/xiaomi/spes/device.mk)
 
 # Inherit some common Omni stuff.
-#$(call inherit-product, vendor/omni/config/common.mk)
+$(call inherit-product, vendor/omni/config/common.mk)
 #$(call inherit-product, vendor/omni/config/gsm.mk)
 
 # Device identifier. This must come after all inclusions
