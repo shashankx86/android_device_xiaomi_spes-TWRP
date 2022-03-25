@@ -1,1 +1,180 @@
-# test
+name: TWRP Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      crypto:
+        description: "Whether to disable the encryption module, true or false"
+        required: false
+        default: "false"
+      Enable_cache:
+        description: "Enable cache, true or false"
+        required: true
+        default: "true"
+      Delete_oldReleases:
+        description: "whether to delete old postings, true or false"
+        required: false
+        default: "false"
+env:
+  Rec_name: TWRP11
+  Rec_ver: 3.6.0
+  Rec_url: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp -b twrp-11
+  device: spes
+  DT_url: https://github.com/shashankx86/android_device_xiaomi_spes -b twrp-11
+  DT_path: device/xiaomi/spes
+  ProductFileHeader: twrp
+  target: recoveryimage
+  WorkSpace: WorkSpace
+  TZ: Asia/Calcutta
+  Author: ${{github.actor}}
+  Delete_old: false
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: "Cleanup Environment"
+        uses: rokibhasansagar/slimhub_actions@main
+
+      - name: Initializing environment
+        run: |
+          echo "::group::Install Build Env Tool"
+          sudo -E apt-get clean
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install curl libstdc++6 git wget repo rsync aria2
+          echo "::endgroup::"
+          git config --global user.name "${{github.actor}}"
+          git config --global user.email "shashankspis20@gamil.com"
+          git clone https://gitlab.com/OrangeFox/misc/scripts.git --depth=1 --single-branch
+          cd scripts
+          echo "::group::Setup Build Env"
+          sudo -E bash setup/android_build_env.sh
+          echo "::endgroup::"
+          echo "::group::Install Android Sdk"
+          sudo -E bash setup/install_android_sdk.sh
+          echo "::endgroup::"
+
+      - name: Sync recovery source
+        run: |
+          mkdir ${{env.WorkSpace}}
+          cd ${{env.WorkSpace}}
+          echo "::group::Repo Init"
+          repo init -u ${{env.Rec_url}} --depth=1 --groups=all,-notdefault,-device,-darwin,-x86,-mips
+          echo "::endgroup::"
+          echo "::group::Repo Sync"
+          repo sync -j4
+          echo "::endgroup::"
+
+      - name: Sync device tree
+        run: |
+          cd ${{env.WorkSpace}}
+          git clone ${{env.DT_url}} --depth=1 --single-branch ${{env.DT_path}}
+
+      - name: Disable Crypto
+        if: (github.event.inputs.crypto == 'true' && github.event.inputs.crypto  != 'false') || contains(github.event.action, 'crypto')
+        run: |
+          cd ${{env.WorkSpace}}/${{env.DT_path}}
+          sed -i 's/TW_INCLUDE_CRYPTO := true/TW_INCLUDE_CRYPTO := false/g' BoardConfig.mk
+          sed -i 's/TW_INCLUDE_CRYPTO_FBE := true/TW_INCLUDE_CRYPTO_FBE := false/g' BoardConfig.mk
+
+      - name: Show tree
+        run: tree -C -d -L 3
+
+      - name: Restore cache
+        uses: actions/cache@v2
+        if: (github.event.inputs.Enable_cache == 'true' && github.event.inputs.Enable_cache  != 'false') || contains(github.event.action, 'Enable_cache')
+        with:
+          path: |
+            ~/.ccache
+            ${{env.WorkSpace}}/out
+          key: ${{runner.os}}-${{env.Rec_name}}-${{env.Rec_ver}}-${{env.device}}
+          restore-keys: |
+            ${{runner.os}}-${{env.Rec_name}}-${{env.Rec_ver}}-${{env.device}}
+
+      - name: Setup ccache
+        uses: alexjurkiewicz/setup-ccache@master
+        if: (github.event.inputs.Enable_cache == 'true' && github.event.inputs.Enable_cache  != 'false') || contains(github.event.action, 'Enable_cache')
+        with:
+          max-size: 5G
+          extra-config: |
+            keep_comments_cpp = true
+
+      - name: Build ${{env.Rec_name}}
+        run: |
+          cd ${{env.WorkSpace}}
+          echo "::group::Run Envsetup.sh"
+          source build/envsetup.sh
+          echo "::endgroup::"
+          echo "::group::Set EnvPath"
+          export ALLOW_MISSING_DEPENDENCIES=true
+          echo "::endgroup::"
+          echo "::group::Lunch ${{env.ProductFileHeader}}_${{env.device}}-eng"
+          lunch ${{env.ProductFileHeader}}_${{env.device}}-eng
+          echo "::endgroup::"
+          echo "::group::Sync"
+          repo sync -j4
+          echo "::endgroup::"
+          echo "::group::Build ${{env.Rec_name}}"
+          mka ${{env.target}}
+          echo "::endgroup::"
+        shell: bash
+
+      - name: Get info
+        id: info
+        run: |
+          echo "::set-output name=date::$(/bin/date -u "+%Y-%m-%d-%H-%M")"
+          echo "::set-output name=OutFolder::"${{env.WorkSpace}}/out/target/product/${{env.device}}""
+        shell: bash
+
+      - name: Show Space Info
+        run: |
+          cd ${{steps.info.outputs.OutFolder}}
+          sudo zip -r9 ${{env.Rec_name}}_for_${{env.device}}_by_${{env.Author}}.zip recovery.img
+          echo "::group::Out Directory Space"
+          du -sh
+          echo "::endgroup::"
+          echo "::group::Ccache Directory Space"
+          du -sh ~/.ccache
+          echo "::endgroup::"
+          echo "::group::Disk Space"
+          df -hlT /
+          echo "::endgroup::"
+          echo "::group::Out Tree"
+          tree -C -L 5
+          echo "::endgroup::"
+
+      - name: Upload firmware directory
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{env.Rec_name}}_for_${{env.device}}-${{github.run_id}}
+          path: ${{steps.info.outputs.OutFolder}}/*.img
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@master
+        with:
+          files: |
+            ${{steps.info.outputs.OutFolder}}/${{env.Rec_name}}_for_${{env.device}}_by_${{env.Author}}.zip
+            ${{steps.info.outputs.OutFolder}}/*.img
+          name: ${{env.Rec_name}}-${{env.device}}-${{github.run_id}}
+          tag_name: ${{env.device}}-${{env.Rec_name}}-${{steps.info.outputs.date}}
+          body: |
+            ${{env.Rec_name}}-${{env.Rec_ver}} for ${{env.device}} build at ${{steps.info.outputs.date}}
+            Actions:[${{github.run_id}}](${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}})
+            Download:[${{env.Rec_name}}_for_${{env.device}}_by_${{env.Author}}.zip](https://download.fastgit.org/${{github.repository}}/releases/download/${{env.device}}-${{env.Rec_name}}-${{steps.info.outputs.date}}/${{env.Rec_name}}_for_${{env.device}}_by_${{env.Author}}.zip)
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Remove old Releases
+        uses: dev-drprasad/delete-older-releases@v0.1.0
+        if: (github.event.inputs.Delete_oldReleases == 'true' && github.event.inputs.Delete_oldReleases  != 'false') || contains(github.event.action, 'Delete_oldReleases')
+        with:
+          keep_latest: 12
+          delete_tags: true
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Delete workflow runs
+        uses: GitRML/delete-workflow-runs@main
+        with:
+          keep_minimum_runs: 10
