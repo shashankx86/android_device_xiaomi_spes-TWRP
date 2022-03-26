@@ -1,0 +1,8 @@
+[
+  {
+    "remote": "github",
+    "repository": "shashankx86/kernel_xiaomi_spes",
+    "target_path": "kernel/xiaomi/spes",
+    "revision": "main"
+  }
+]
