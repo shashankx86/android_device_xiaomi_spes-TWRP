@@ -6,8 +6,8 @@
 | ----------------------- | :---------------------------------------------------------- |
 | Codename                | Spes                                                        |
 | SoC                     | Qualcomm SM6225 Snapdragon 680 4G (6 nm)                    |
-| CPU                     | 8x Qualcomm® Kryo™ 260 CPU up to 1.8GHz                     |
-| GPU                     | Adreno 512                                                  |
+| CPU                     | Octa-core (4x2.4 GHz Kryo 265 Gold & 4x1.9 GHz Kryo 265 Silver)|
+| GPU                     | Adreno 610                                                  |
 | Memory                  | 4GB / 6GB RAM                                               |
 | Shipped Android version | 11                                                          |
 | Storage                 | 64/128GB                                                    |
