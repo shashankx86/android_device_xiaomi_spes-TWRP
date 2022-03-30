@@ -6,7 +6,7 @@ on:
 env:
   MANIFEST: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp
   MANIFEST_BRANCH: twrp-11
-  DEVICE: rosy
+  DEVICE: spes
   DT_LINK: https://github.com/shashankx86/android_device_xiaomi_spes-TWRP
   DT_PATH: device/xiaomi/spes
   TARGET: bootimage
