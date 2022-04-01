@@ -5,7 +5,7 @@ export FOX_BRANCH="fox_11.0"
 export DT_LINK="https://github.com/shashankx86/android_device_xiaomi_spes-TWRP.git -b twrp-11"
 
 export DEVICE="spes"
-export OEM="Xiaomi"
+export OEM="xiaomi"
 export TARGET="bootimage"
 
 export OUTPUT="OrangeFox*.zip"
