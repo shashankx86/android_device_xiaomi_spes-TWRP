@@ -89,7 +89,7 @@ TARGET_FORCE_PREBUILT_KERNEL := true
 TARGET_KERNEL_ARCH := arm64
 TARGET_KERNEL_CONFIG := vendor/bengal_defconfig
 TARGET_KERNEL_HEADERS := kernel/xiaomi/spes
-TARGET_KERNEL_SOURCE := kernel/xiaomi/spes
+#TARGET_KERNEL_SOURCE := kernel/xiaomi/spes
 
 # Metadata
 BOARD_BUILD_SYSTEM_ROOT_IMAGE := false
