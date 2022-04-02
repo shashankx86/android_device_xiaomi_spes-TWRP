@@ -25,17 +25,11 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#device         mount point      fstype        [device2] [length=]
-
-system                                     /system         ext4    ro,barrier=1,discard                                            wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
-system_ext                                 /system_ext     ext4    ro,barrier=1,discard                                            wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
-vendor                                     /vendor         ext4    ro,barrier=1,discard                                            wait,slotselect,avb,logical,first_stage_mount
-product                                    /product        ext4    ro,barrier=1,discard                                            wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
-/dev/block/bootdevice/by-name/userdata     /data           f2fs    noatime,nosuid,nodev,discard,fsync_mode=nobarrier          wait,check,encryptable=footer
-/dev/block/bootdevice/by-name/metadata     /metadata       ext4    noatime,nosuid,nodev,discard                               wait,check,formattable,wrappedkey
-/dev/block/mmcblk1p1                       /sdcard         vfat    nosuid,nodev                                               wait
-/dev/block/bootdevice/by-name/boot         /boot           emmc    defaults                                                   defaults
-/dev/block/bootdevice/by-name/misc         /misc           emmc    defaults                                                   defaults
-/dev/block/bootdevice/by-name/cust         /cust           ext4    ro,nosuid,nodev,barrier=1                                  wait,check
-/dev/block/bootdevice/by-name/rescue       /cache          ext4    nosuid,noatime,nodev,barrier=1                             wait
-
+#<src>                                                 <mnt_point>            <type>  <mnt_flags and options>                              <fs_mgr_flags>
+system                                                  /system                ext4    ro,barrier=1,discard                                 wait,slotselect,avb=vbmeta_system,logical,first_stage_mount,avb_keys=/avb/q-gsi.avbpubkey:/avb/r-gsi.avbpubkey:/avb/s-gsi.avbpubkey
+system_ext                                              /system_ext            ext4    ro,barrier=1,discard                                 wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
+vendor                                                  /vendor                ext4    ro,barrier=1,discard                                 wait,slotselect,avb,logical,first_stage_mount
+product                                                 /product               ext4    ro,barrier=1,discard                                 wait,slotselect,avb=vbmeta_system,logical,first_stage_mount
+/dev/block/by-name/metadata                             /metadata              ext4    noatime,nosuid,nodev,discard                         wait,check,formattable,wrappedkey,first_stage_mount
+/dev/block/bootdevice/by-name/userdata                  /data                  f2fs    noatime,nosuid,nodev,discard,reserve_root=32768,resgid=1065,fsync_mode=nobarrier,inlinecrypt  latemount,wait,check,formattable,quota,reservedsize=128M,fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized+wrappedkey_v0,wrappedkey,metadata_encryption=aes-256-xts:wrappedkey_v0,keydirectory=/metadata/vold/metadata_encryption,checkpoint=fs
+/dev/block/bootdevice/by-name/misc                      /misc                  emmc    defaults                                             defaults
