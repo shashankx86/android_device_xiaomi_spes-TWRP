@@ -37,11 +37,12 @@ jobs:
             
        - name: Sync recovery source and device tree
          run: |
-             mkdir work
+            mkdir work
              cd work
-             repo init -u $MANIFEST -b $MANIFEST_BRANCH --depth=1 --groups=all,-notdefault,-device,-darwin,-x86,-mips
-             repo sync -j4
-             git clone $DT_LINK --depth=1 --single-branch $DT_PATH
+             repo init -u $MANIFEST --depth=1
+             repo sync -c -j4 --force-sync --no-clone-bundle --no-tags
+             repo sync -c -j4 --force-sync --no-clone-bundle --no-tags
+             git clone --depth=1 $DT_LINK $DT_PATH
              
        - name: Build
          run: |
